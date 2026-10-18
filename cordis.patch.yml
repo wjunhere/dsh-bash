@@ -2,7 +2,7 @@
 # layer. `id` is the Loader entry id, `name` the npm package name.
 - insert:
     - id: dsh-bash
-      name: 'dsh-bash'
+      name: '@wjunhere/dsh-bash'
       # Git Bash is auto-detected (Program Files, scoop, PATH `git.exe`, ...).
       # Pin it explicitly when detection would pick the wrong install:
       # config:

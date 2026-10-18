@@ -1,5 +1,6 @@
 # dsh-bash
 
+[![npm](https://img.shields.io/npm/v/%40wjunhere%2Fdsh-bash)](https://www.npmjs.com/package/@wjunhere/dsh-bash)
 [![GitHub](https://img.shields.io/badge/GitHub-wjunhere%2Fdsh--bash-181717?logo=github)](https://github.com/wjunhere/dsh-bash)
 
 给 **Windows 上的 DSH（DeepSeek Harness）** 提供一个 `bash` 工具，和原生 `pwsh` 平级可用。
@@ -28,7 +29,12 @@
 
 ## 安装
 
-仓库：<https://github.com/wjunhere/dsh-bash>
+从 npm 安装（推荐）：在 DSH 插件管理器里安装 npm 包 `@wjunhere/dsh-bash`，它会装进当前 profile，重新加载后模型即可见 `bash` 工具。
+
+- npm 页面：<https://www.npmjs.com/package/@wjunhere/dsh-bash>
+- 要求 DSH `0.2.1-rc.2`（运行时包取自 npm 的 `next` 标签）
+
+改代码或本地开发：
 
 ```sh
 git clone https://github.com/wjunhere/dsh-bash.git
@@ -36,9 +42,9 @@ cd dsh-bash
 npm install
 ```
 
-然后用 DSH 的插件管理器安装这个目录（等同 `plugin_manager` 的 `install_bundle`），重启 DSH 后模型即可见 `bash` 工具。
+然后用插件管理器安装这个目录（等同 `plugin_manager` 的 `install_bundle`）。
 
-> DSH 从软链接的真实路径加载插件，所以 `npm install` 不能省；包未发布到 npm，因此没有一条命令的远程安装方式。
+> DSH 从软链接的真实路径加载插件，本地目录安装时 `npm install` 不能省。
 
 ## 配置
 
@@ -46,7 +52,7 @@ npm install
 
 ```yaml
 - id: dsh-bash
-  name: 'dsh-bash'
+  name: '@wjunhere/dsh-bash'
   config:
     # 自动探测不到、或想指定某个 Git 安装时
     bashPath: 'D:\software\git\Git\bin\bash.exe'

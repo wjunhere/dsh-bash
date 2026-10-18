@@ -1,5 +1,5 @@
 {
-  "name": "dsh-bash",
+  "name": "@wjunhere/dsh-bash",
   "description": "Model-facing bash tool for Windows backed by Git for Windows, a parallel tool to pwsh",
   "version": "0.1.0",
   "type": "module",
@@ -23,7 +23,28 @@
   "scripts": {
     "test": "node --test \"test/*.test.js\""
   },
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "bash",
+    "git-bash",
+    "windows",
+    "plugin",
+    "tool"
+  ],
+  "author": "wjunhere",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wjunhere/dsh-bash.git"
+  },
+  "homepage": "https://github.com/wjunhere/dsh-bash#readme",
+  "bugs": {
+    "url": "https://github.com/wjunhere/dsh-bash/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "engines": {
     "dsh": ">=0.2.1-rc.2 <0.3.0"
   },

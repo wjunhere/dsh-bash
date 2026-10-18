@@ -15,7 +15,7 @@ index.js            兼容入口（重新导出 lib/index.js）
 lib/index.js        Host 插件：工具注册、执行、job、沙箱、渲染
 lib/git-bash.js     bash.exe 探测（唯一不依赖 DSH 包的模块，可单测）
 test/git-bash.test.js  node --test
-cordis.patch.yml    bundle 激活行（id: dsh-bash）
+cordis.patch.yml    bundle 激活行（id: dsh-bash，name: @wjunhere/dsh-bash）
 docs/               parity / API 审计 / 评审 / 验证记录
 scripts/            asar 源码导出脚本
 ```
@@ -49,6 +49,13 @@ scripts/            asar 源码导出脚本
 - **错误元数据**：插件从自己的 `node_modules` 解析 `@deepseek-ai/dsh-llm`/`dsh-tools`（profile bundle 从软链接真实路径加载，peer 不会被装到本目录），而宿主用 asar 里的那份 `HarnessError` 做 `instanceof` 判断，所以本工具抛出的 abort / `SANDBOX_UNAVAILABLE` 在持久化的 `tool/result` 里只有文本，没有 `error.info` 结构化码。文本与 `isError` 不受影响。根治需要宿主为插件做模块别名，属 DSH 侧能力。
 - **沙箱未实测**：默认 profile 是 `danger-full-access`，`read-only` / `workspace-write` 下的 confine、拒绝标记与提权审批还没有现场证据；ACL runner 能否包住 `bash.exe` 仍是开放问题。
 - **源码文案来源**：模型可见描述/渲染文本与执行语义对齐 `@deepseek-ai/dsh-tool-bash`（DeepSeek Harness，MIT），改动时以 `docs/parity.md` 的逐字引用为准。
+
+## 发布
+
+- npm 包名 `@wjunhere/dsh-bash`（public）；仓库内插件 id / cordis `name` 仍是 `dsh-bash`，两者不要混。
+- 发布前：`npm test` 全绿、`git status` 干净、提交已推送；`npm publish`（`publishConfig.access` 已设 public）。
+- 发布后核对：`npm view @wjunhere/dsh-bash version`，并在空目录 `npm install @wjunhere/dsh-bash` 验证 tarball 内容完整。
+- 本地开发用 `link:` 安装，改 `package.json` 的 name 后必须重装 bundle（cordis 不会热加载）。
 
 ## 验证流程
 
