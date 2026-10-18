@@ -1,5 +1,7 @@
 # dsh-bash
 
+[![GitHub](https://img.shields.io/badge/GitHub-wjunhere%2Fdsh--bash-181717?logo=github)](https://github.com/wjunhere/dsh-bash)
+
 给 **Windows 上的 DSH（DeepSeek Harness）** 提供一个 `bash` 工具，和原生 `pwsh` 平级可用。
 
 它调用 **Git for Windows 自带的 bash.exe**：不依赖 WSL、不用装额外环境，模型拿到的就是一个标准的 `bash -c`。
@@ -26,11 +28,17 @@
 
 ## 安装
 
-插件以 profile bundle 形式安装。包未发布到 npm 时，用本地目录安装：
+仓库：<https://github.com/wjunhere/dsh-bash>
 
-1. 在本仓库目录执行 `npm install`（DSH 从软链接的真实路径加载插件，需要它自己的 `node_modules`）；
-2. 用 DSH 的插件管理器安装目录 `B:\...\dsh-bash`（等同 `plugin_manager` 的 `install_bundle`）；
-3. 重启 DSH 后，模型即可见 `bash` 工具。
+```sh
+git clone https://github.com/wjunhere/dsh-bash.git
+cd dsh-bash
+npm install
+```
+
+然后用 DSH 的插件管理器安装这个目录（等同 `plugin_manager` 的 `install_bundle`），重启 DSH 后模型即可见 `bash` 工具。
+
+> DSH 从软链接的真实路径加载插件，所以 `npm install` 不能省；包未发布到 npm，因此没有一条命令的远程安装方式。
 
 ## 配置
 
