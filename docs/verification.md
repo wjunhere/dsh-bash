@@ -36,6 +36,17 @@
 | pwsh 并存 | `pwsh` 调用 | 正常，两个工具互不影响 |
 | 探测单测 | `npm test` | 10/10 通过 |
 
+## npm 发布（2026-10-18）
+
+| 检查项 | 结果 |
+| --- | --- |
+| 包名 / 版本 | `@wjunhere/dsh-bash@0.1.0`，`dist-tags.latest = 0.1.0`，public |
+| 发布命令 | `npm publish`（`publishConfig.access = public`）；registry 返回 `PUT 202`，约 5 分钟后 packument 可读 |
+| tarball 内容 | `LICENSE`、`README.md`、`cordis.patch.yml`、`index.js`、`lib/git-bash.js`、`lib/index.js`、`package.json`（7 个文件） |
+| 干净安装 | 空目录 `npm install @wjunhere/dsh-bash` → 28 个包，`node -e "import('@wjunhere/dsh-bash')"` 导出 `Config/apply/inject/name` |
+| 本地 profile | 依赖改为 `@wjunhere/dsh-bash: link:B:/vibe_program/dsh-bash`，bundle 行同步；重装后 `bash` 工具冒烟通过 |
+| 发布副作用 | registry packument 里多出 npm 对新包自动创建的 `0.0.0-stage` 占位版本；`latest` 与安装解析不受影响，`npm unpublish` 被 granular token 的 2FA 策略拒绝，暂不处理 |
+
 ## 未验证（明确限制）
 
 - **沙箱拒绝 / 提权 / runner 失败**：本 profile 默认 `danger-full-access`，`ctx.sandbox.confine` 与 `sandbox_permissions` 审批路径没有被实际触发。需要在 `read-only` 或 `workspace-write` 会话里复测，尤其是 Windows ACL runner 能否包住 `bash.exe`。runner 失败时前台会抛 `SandboxUnavailableError`，只有代码审查与单测覆盖，没有现场证据。
