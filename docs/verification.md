@@ -47,6 +47,21 @@
 | 本地 profile | 依赖改为 `@wjunhere/dsh-bash: link:B:/vibe_program/dsh-bash`，bundle 行同步；重装后 `bash` 工具冒烟通过 |
 | 发布副作用 | registry packument 里多出 npm 对新包自动创建的 `0.0.0-stage` 占位版本；`latest` 与安装解析不受影响，`npm unpublish` 被 granular token 的 2FA 策略拒绝，暂不处理 |
 
+## v0.2.0：description 可选 + 智能超时（2026-10-19）
+
+单测 `npm test` 20/20（`test/git-bash.test.js` 10 + `test/smart-timeout.test.js` 10）。
+
+现场验证：临时在 profile 里把 `smartTimeout.defaultSeconds` 设为 3（验证完已删除）后重装 bundle。
+
+| 用例 | 调用 | 结果 |
+| --- | --- | --- |
+| 不传 `description` | `echo "no-description-ok"; echo "DSH_PROFILE=$DSH_PROFILE"` | 正常执行，无参数校验错误 |
+| 普通命令走 default 桶 | `echo probe-default-start; sleep 8; echo probe-default-end`（3s 配置） | 3000ms 后 `[still running after 3000ms; moved to background job …]`，job 后续 `[status: completed, exit code: 0]` |
+| 长任务走 long 桶 | `echo probe-long-start; sleep 25; echo probe-long-end` | 25s 前台跑完（`sleep N≥20` 命中长任务规则），没有转后台 |
+| 内层 timeout 保护 | `timeout 5 sleep 20; echo "inner-done code=$?"` | 5s 后内层触发，`inner-done code=124`，外层没抢跑 |
+| 显式 timeoutMs 优先 | `sleep 8` + `timeoutMs: 5000` | `[still running after 5000ms; …]`（不是配置里的 3000ms） |
+| 恢复默认配置 | 删除临时配置、重装后 `echo default-restored; sleep 8; echo done` | 前台 8s 完成，未触发转后台 |
+
 ## 未验证（明确限制）
 
 - **沙箱拒绝 / 提权 / runner 失败**：本 profile 默认 `danger-full-access`，`ctx.sandbox.confine` 与 `sandbox_permissions` 审批路径没有被实际触发。需要在 `read-only` 或 `workspace-write` 会话里复测，尤其是 Windows ACL runner 能否包住 `bash.exe`。runner 失败时前台会抛 `SandboxUnavailableError`，只有代码审查与单测覆盖，没有现场证据。

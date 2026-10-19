@@ -1,7 +1,7 @@
 {
   "name": "@wjunhere/dsh-bash",
   "description": "Model-facing bash tool for Windows backed by Git for Windows, a parallel tool to pwsh",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "main": "lib/index.js",
   "exports": {

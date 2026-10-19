@@ -2,6 +2,17 @@
 
 Read-only analysis of the installed runtime. All line citations are 1-based and refer to the files below; verbatim strings are copied byte-for-byte from source (including `—` U+2014 and `’` U+2019) because they will become our tool text.
 
+## Deliberate deviations (v0.2.0)
+
+Two model-facing differences are requested product decisions, not drift; everything else below still applies byte-for-byte:
+
+| # | Native `dsh-tool-bash` | This plugin | Why |
+| --- | --- | --- | --- |
+| 1 | `description` parameter `required: true`, empty value rejected | optional; omitted/empty is accepted, card falls back to `command` | saves ~10 generated tokens per call; UI keeps the command as the title |
+| 2 | `timeoutMs` defaults to 120000, cap 600000 | content-aware default (120s ordinary / 1800s long-running), cap 3600s, inner `timeout N` gets N + 30s | a flat 120s promotes every 20-minute build; see `lib/smart-timeout.js` and README「智能超时」 |
+
+`smartTimeout.enabled: false` restores native timeout behavior (120000 / 600000), so the timeout deviation is opt-out at the config layer. The tool description and parameter texts differ only in the sentences that document these two changes.
+
 ## Sources
 
 Runtime: DSH `0.2.1-rc.2`. Everything below lives inside the Electron asar, which `pwsh`/`node`/`rg` cannot read; all reads used the `read` tool (asar-aware). Package layout follows each `package.json` `exports`/`files`.

@@ -14,15 +14,26 @@ Windows 上用 Git for Windows 提供 `bash` 工具的 DSH 插件。面向用户
 index.js            兼容入口（重新导出 lib/index.js）
 lib/index.js        Host 插件：工具注册、执行、job、沙箱、渲染
 lib/git-bash.js     bash.exe 探测（唯一不依赖 DSH 包的模块，可单测）
+lib/smart-timeout.js  按命令内容选默认 timeoutMs（纯函数，可单测）
 test/git-bash.test.js  node --test
+test/smart-timeout.test.js  决策表，node --test
 cordis.patch.yml    bundle 激活行（id: dsh-bash，name: @wjunhere/dsh-bash）
 docs/               parity / API 审计 / 评审 / 验证记录
 scripts/            asar 源码导出脚本
 ```
 
+## 刻意偏离原生（唯一允许的两处）
+
+原生 `dsh-tool-bash` 是逐字对齐对象，但用户明确要求下面两点不同；改其它文案前先确认不在这个清单里：
+
+1. **`description` 参数可选**：schema 去掉 `required`，缺失/空串都不报错；`presentBashCall` 用 `command` 兜底卡片文案。原生是必填。
+2. **智能 `timeoutMs` 默认值**：不传时按命令内容选 120s / 1800s（构建、测试、安装、`git clone`、`tail -f`、带 sleep 的轮询等），硬上限 3600s；命令自带 `timeout N` 时给 `N + graceSeconds`。实现见 `lib/smart-timeout.js`，配置见 `smartTimeout.*`；`smartTimeout.enabled: false` 回到原生的固定 120s / 上限 600s。原生只有固定默认与 600s 上限。
+
+其余（工具名、描述正文、参数名、输出 schema、渲染文本、systemPrompt 段、job 契约、卡片）仍要求逐字一致。
+
 ## 关键约定（改动前必读）
 
-1. **模型可见文本逐字对齐**。工具描述里的 `$DSH_*`、`[exit code: N]`、`[stderr]`、`(no output)`、`[timed out after Nms]`、`[still running after Nms; moved to background job X]` 等字符串都是从原生命令逐字抄来的，改一个字符就是行为漂移。不要在工具描述里塞 Windows 注意事项（那些放 README/docs）。
+1. **模型可见文本逐字对齐**（两处刻意偏离见上节）。工具描述里的 `$DSH_*`、`[exit code: N]`、`[stderr]`、`(no output)`、`[timed out after Nms]`、`[still running after Nms; moved to background job X]` 等字符串都是从原生命令逐字抄来的，改一个字符就是行为漂移。不要在工具描述里塞 Windows 注意事项（那些放 README/docs）。
 2. **执行层要点**（原生 `dsh-bash-local` 的等价实现）：
    - `ctx.sandbox.confine(argv, policy, signal)` 是 **async**（0.2.1-rc.2），必须 `await`，否则 argv 是 undefined；
    - `ctx.subprocess.spawn` 的句柄用 `handle.collected.{stdout,stderr}`（不是 `observed`），停止用 `handle.terminate()`（不是 `kill()`）；`handle.done` resolve `{exitCode,signal}`，只有 spawn/提供方失败才 reject；

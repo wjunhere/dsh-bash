@@ -59,6 +59,12 @@ npm install
     # 关闭后台任务 / 超时转后台
     enableRunInBackground: true
     promoteOnTimeout: true
+    # 智能超时（默认开启，见下节）
+    smartTimeout:
+      defaultSeconds: 120
+      longSeconds: 1800
+      maxSeconds: 3600
+      graceSeconds: 30
 ```
 
 | 配置 | 默认 | 说明 |
@@ -66,14 +72,31 @@ npm install
 | `bashPath` | 自动探测 | `bash.exe` 绝对路径；填错直接报错 |
 | `enableRunInBackground` | `true` | 是否暴露 `run_in_background` 参数（关闭后也不再有超时转后台） |
 | `promoteOnTimeout` | `true` | 命令超时后不杀，转成后台 job 继续跑 |
+| `smartTimeout.enabled` | `true` | 关掉后回到固定默认 120s / 上限 600s |
+| `smartTimeout.defaultSeconds` | `120` | 普通命令的默认超时 |
+| `smartTimeout.longSeconds` | `1800` | 跑得久的命令（构建/测试/安装等）的默认超时 |
+| `smartTimeout.maxSeconds` | `3600` | 硬上限，显式传的 `timeoutMs` 也受它约束 |
+| `smartTimeout.graceSeconds` | `30` | 命令自带 `timeout N` 时额外给的余量 |
+| `smartTimeout.longPatterns` | `[]` | 额外的正则，命中就归到 `longSeconds` |
+
+## 智能超时
+
+`timeoutMs` 不填时不再固定 120s，而是按命令内容选一个默认值（参考 [pi-smart-timeout](https://github.com/wjunhere/pi-smart-timeout)）。判断顺序，命中即停：
+
+1. 显式传了 `timeoutMs` → 用它，超过 `maxSeconds` 压到上限；
+2. 命令自带 `timeout 30 ...` → 用 `30 + graceSeconds`，让内层先触发，不抢跑；
+3. 看起来是长任务（`npm install`、`cargo build`、`pytest`、`git clone`、`docker compose up`、`tail -f`、带 `sleep` 的轮询循环等）→ `longSeconds`；
+4. 其他 → `defaultSeconds`。
+
+引号里的文字不参与判断，所以 `grep -n 'npm install' src/`、`echo "make sure"` 仍按普通命令处理；`timeout 0 cmd`（coreutils 里表示不限时）也不算内层保护。想加自己的长任务特征，用 `longPatterns`。
 
 ## 工具参数
 
 | 参数 | 说明 |
 | --- | --- |
-| `command` | 要执行的 bash 命令（`bash -c`） |
-| `description` | 一句话说明命令用途（界面展示） |
-| `timeoutMs` | 超时，默认 120s，上限 600s；超时后默认转后台 |
+| `command` | 要执行的 bash 命令（`bash -c`）；必填 |
+| `description` | 可选的一句话说明（界面展示，不填就用命令本身） |
+| `timeoutMs` | 可选；不填就走上面的智能超时，显式传入时受 `maxSeconds` 约束；超时后默认转后台 |
 | `workdir` | 工作目录，默认会话目录；相对路径按会话目录解析 |
 | `run_in_background` | 后台运行，立即返回 jobId，用 `job_output` / `job_kill` 收集和停止 |
 | `sandbox_permissions` / `justification` | 沙箱拒绝后一次性提权重试（组合里配置了沙箱时可用） |
